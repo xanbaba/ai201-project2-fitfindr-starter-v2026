@@ -59,24 +59,24 @@
 
 ### `search_listings`
 
-- **What it does:**
-- **Inputs:** <!-- name and type each: `max_price` (float), not "a price" -->
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Searches the local mock listings by keyword overlap, with optional size and inclusive price filters, and ranks the matching items.
+- **Inputs:** `description` (`str`), containing item keywords; `size` (`str | None`, default `None`), containing a size label; `max_price` (`float | None`, default `None`), the maximum listing price in US dollars. `None` skips the corresponding filter. Match sizes case-insensitively as complete labels: `M` matches `M`, `S/M`, and `M/L`; `L` matches `L` and `L/XL`, but not `XL`; ignore parenthesized fit notes. Numeric shoe sizes such as `8` match `US 8`, but not `US 8.5`; waist labels such as `W30` match the waist in `W30 L30`. One-size listings match only an explicit `One Size` request, not an arbitrary clothing size.
+- **Returns:** A `list[dict]` of at most `config.SEARCH_RESULT_LIMIT` original listing records, each containing `id` (`str`), `title` (`str`), `description` (`str`), `category` (`str`), `style_tags` (`list[str]`), `size` (`str`), `condition` (`str`), `price` (`float`), `colors` (`list[str]`), `brand` (`str | None`), and `platform` (`str`). Tokenize the description and each listing's title, description, and style tags into lowercase alphanumeric words; score each eligible listing by the count of distinct query words present in those fields. Keep positive scores, sort by descending score, then ascending price, then ascending ID. Every returned item must satisfy the supplied size and price filters; prices equal to `max_price` are allowed.
+- **When it has nothing:** Returns `[]` when no listing passes the filters with a positive keyword score, or when the description has no alphanumeric words. Never returns `None` for no matches.
 
 ### `suggest_outfit`
 
-- **What it does:**
-- **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Uses the model through `generate()` to suggest one or two outfits combining the selected listing with the user's wardrobe.
+- **Inputs:** `new_item` (`dict`), one complete listing record in the shape returned by `search_listings`; `wardrobe` (`dict`), with an `items` key containing a `list[dict]` of owned pieces. Each wardrobe piece has `id` (`str`), `name` (`str`), `category` (`str`), `colors` (`list[str]`), `style_tags` (`list[str]`), and optional `notes` (`str | None`). A missing brand or null notes must not be presented as the text `None`.
+- **Returns:** A non-empty `str` describing one or two outfits that include the selected item and name the owned pieces used, with a short explanation of how the colors or style work together. The prompt must distinguish owned pieces from any additional styling suggestions so it does not claim the user owns an unlisted item.
+- **When it has nothing:** For `wardrobe={"items": []}`, returns non-empty general styling advice for the selected item, clearly stating that no wardrobe items are saved. If the model returns only whitespace, returns `No outfit suggestions were generated. Try again.`; if the service cannot be reached, propagates `ModelUnavailable` from the supplied adapter.
 
 ### `create_fit_card`
 
-- **What it does:**
-- **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Uses the model through `generate()` to turn the outfit suggestion and selected listing into a short caption someone could post.
+- **Inputs:** `outfit` (`str`), the styling text returned by `suggest_outfit`; `new_item` (`dict`), the same complete listing record used for the outfit suggestion, including its title, price, platform, colors, and style tags; `brand` may be null.
+- **Returns:** A non-empty `str` containing a two-to-four sentence caption that mentions the item, its listing price in US dollars, and its platform once each, and describes a specific outfit or style from `outfit`. The prompt asks for a casual post without invented brand names or listing details; these are intended model-output requirements, to be measured later rather than assumed guaranteed.
+- **When it has nothing:** For empty or whitespace-only `outfit`, returns `No outfit was provided, so a fit card could not be created.` without calling the model. If the model returns only whitespace, returns `No fit card was generated. Try again.`; if the service cannot be reached, propagates `ModelUnavailable` from the supplied adapter.
 
 ---
 
@@ -93,9 +93,11 @@
      The grader checks your code against what you claim here, so the file and
      function have to be real. -->
 
-**Branch rule:**
+**Branch rule:** If `search_listings` returns an empty list, set `session["error"]` to `No matching listings found. Try different keywords, a different size, or a higher budget.` and return the session immediately, without calling `suggest_outfit` or `create_fit_card`. Otherwise, store the first result in `session["selected_item"]`, call `suggest_outfit` with that stored item and the session wardrobe, then call `create_fit_card` with the stored outfit suggestion and the same selected item.
 
 **Where it lives:** `agent.py::run_agent`
+
+This is the contract for the loop to be built in Milestone 5; the current function is still a stub.
 
 **How the query is parsed:** <!-- regex, string splitting, or asking the model — say which -->
 

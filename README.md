@@ -41,7 +41,17 @@
 
 <!-- Three or four sentences: what a user asks for, and what they get back. -->
 
+FitFindr is a command-line thrift assistant that takes a request such as
+`vintage graphic tee under $30, size M` and searches 40 local mock listings.
+It filters by size and budget, ranks keyword matches, and selects the first
+result. Using the example wardrobe supplied by the CLI, it suggests an outfit
+and writes a short caption with the item's title, price, and platform; an empty
+wardrobe gets general styling advice. If no listing matches, it stops before
+the outfit and caption tools and tells the user what search constraints to change.
 
+Repository for Units 3 and 4:
+[xanbaba/ai201-project2-fitfindr-starter-v2026](https://github.com/xanbaba/ai201-project2-fitfindr-starter-v2026).
+Keep this same repository and its commit history for the next unit.
 
 ---
 
@@ -249,15 +259,15 @@ Mocked adapter checks also passed for blank model-response messages,
 
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* I gave Codex the Milestone 4 instructions to build and test each tool independently, including empty inputs and three captions for the same item.
+- *What came back:* Codex implemented local keyword search and two model-backed tools, then ran terminal checks. The three uncached captions differed; the search output also showed that a mesh top mentioning "graphic tee" could rank ahead of an actual tee, and an outfit response gave the owned bag the wrong ID.
+- *What I changed:* With Codex's assistance, I replaced the three stubs in `tools.py` with the specified implementations, added complete-label size matching and empty-input handling, and recorded actual outputs and both limitations in this README. I kept the agreed keyword scoring rule for this build rather than claiming the relevance problem had been fixed.
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* I gave Codex the Milestone 5 instructions to connect the tools through session state, verify the selected item's actual downstream inputs, and stop on an impossible query.
+- *What came back:* Codex implemented a four-stage loop and regex parser, printed the matching and empty sessions, and captured the actual tool arguments. The first search result matched the selected item and both downstream inputs; the impossible query called neither downstream tool and left `fit_card` as `None`.
+- *What I changed:* With Codex's assistance, I replaced the stub in `agent.py::run_agent`, stored each result in the session before the next step read it, and retained the iteration guard. I added the real CLI output, parsing rules, state checks, and empty-search guidance to the Planning Loop and Sample Run sections. Trace instrumentation and MCP changes remain for Unit 4.
 
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 

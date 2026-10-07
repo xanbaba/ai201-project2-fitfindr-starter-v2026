@@ -13,8 +13,8 @@
 > python app.py ask 'vintage graphic tee under $30'
 > ```
 >
-> All three tools are stubs, so that last command will do nothing useful yet.
-> That's the starting position.
+> The three tools are implemented and can be tested independently. The planning
+> loop is still a stub until Milestone 5, so `ask` reports that it is not built.
 >
 > **The rest of this file is your submission.** Fill it in as you go.
 
@@ -122,19 +122,70 @@ $ python app.py ask '...'
 **The three tools, tested one at a time**
 
 ```
-$ python -c "from tools import search_listings; print(search_listings('graphic tee', max_price=30))"
-
+$ python -c "from tools import search_listings; print(search_listings('graphic tee', size='M', max_price=30))"
+[{'id': 'lst_017', 'title': 'Mesh Long-Sleeve Top — Black', 'description': 'Sheer black mesh long-sleeve. Great for layering under a graphic tee or over a bralette. Stretchy material, fits true to size.', 'category': 'tops', 'style_tags': ['y2k', 'grunge', 'goth', 'layering'], 'size': 'S/M', 'condition': 'excellent', 'price': 15.0, 'colors': ['black'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_002', 'title': 'Y2K Baby Tee — Butterfly Print', 'description': 'Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.', 'category': 'tops', 'style_tags': ['y2k', 'vintage', 'graphic tee', 'cottagecore'], 'size': 'S/M', 'condition': 'excellent', 'price': 18.0, 'colors': ['white', 'pink', 'purple'], 'brand': None, 'platform': 'depop'}]
 ```
 
 ```
-$ python -c "from tools import suggest_outfit; ..."
+$ python -c "from tools import suggest_outfit; from utils.data_loader import get_example_wardrobe, load_listings; print(suggest_outfit(load_listings()[1], get_example_wardrobe()))"
+Here is a practical, thrift-styled outfit utilizing the selected listing and your owned wardrobe pieces:
 
+### Outfit: Y2K Streetwear Casual
+
+**The Look:**
+* **Top:** Y2K Baby Tee — Butterfly Print *(Selected Listing)*
+* **Bottoms:** Baggy straight-leg jeans, dark wash *(Owned piece: w_001)*
+* **Outerwear:** Vintage black denim jacket *(Owned piece: w_006)*
+* **Shoes:** Chunky white sneakers *(Owned piece: w_007)*
+* **Accessories:** Black crossbody bag *(Owned piece: w_005)*
+* *Suggestion (Not owned):* Silver chain necklace to complement the Y2K aesthetic
+
+**Why it works:**
+This outfit plays with proportions by balancing the fitted, cropped nature of the butterfly baby tee with the voluminous silhouette of the high-waisted, baggy dark wash jeans. The white in the baby tee ties directly into the chunky white sneakers, creating a cohesive color bridge from top to bottom. Layering the slightly cropped vintage black denim jacket over top keeps the streetwear edge sharp while offering a tonal black foundation that lets the pink and purple butterfly graphic stand out.
 ```
 
 ```
-$ python -c "from tools import create_fit_card; ..."
-
+$ python -c "import config; config.CACHE_ENABLED=False; from tools import create_fit_card; from utils.data_loader import load_listings; item=load_listings()[1]; [print('Caption '+str(i+1)+': '+create_fit_card('Pair the tee with baggy dark-wash jeans and chunky white sneakers for a relaxed Y2K streetwear outfit.', item)) for i in range(3)]"
+Caption 1: Scored this adorable Y2K Baby Tee — Butterfly Print while browsing online. I am totally obsessed with the retro pastel graphics. I picked it up on depop for just $18.00 and cannot wait to wear it. Try styling it with baggy dark-wash jeans and chunky white sneakers for a relaxed Y2K streetwear outfit.
+Caption 2: I am obsessed with this Y2K Baby Tee — Butterfly Print I just scored. I found it on depop for only $18.00 and the fit is unreal. I am planning to style it with baggy dark-wash jeans and chunky white sneakers for a relaxed Y2K streetwear outfit.
+Caption 3: I am obsessed with this Y2K Baby Tee — Butterfly Print I just scored. I found it on depop for only $18.00 and it is in such great shape. I am planning to style it with baggy dark-wash jeans and chunky white sneakers for a relaxed Y2K streetwear outfit.
 ```
+
+These commands were run with `.venv\Scripts\python.exe` on Windows. The caption
+command disables caching only for that process; `TEMPERATURE` remains 0.9 and
+normal development caching remains enabled. All three captions differ, although
+the last two share an opening sentence. These are standalone tool checks, not
+the five-try acceptance evaluation for Unit 4.
+
+The search output follows the keyword-overlap contract: the mesh top mentions
+"graphic tee" in its description and ties with the baby tee, so its lower price
+puts it first. This shows a relevance limitation of the simple scoring rule.
+The outfit output names the correct owned bag but gives its ID as `w_005`;
+the actual bag ID is `w_010`. The model's item references need later scrutiny.
+
+**Empty-case checks**
+
+```text
+$ python -c "from tools import suggest_outfit,create_fit_card; from utils.data_loader import get_empty_wardrobe,load_listings; print('Empty wardrobe: '+suggest_outfit(load_listings()[1],get_empty_wardrobe())); print('Empty outfit: '+create_fit_card('   ',load_listings()[1]))"
+Empty wardrobe: No wardrobe items are saved. Here are two general styling ideas for this Y2K butterfly baby tee based on its fitted crop silhouette and nostalgic color palette:
+
+**1. The Classic Y2K Streetwear Look**
+* **The Vibe:** Early 2000s mall-goth meets pop princess.
+* **How to style it:** Pair the baby tee with low-rise baggy cargo pants in olive green or classic denim to balance out the fitted crop of the shirt. Add a chunky platform sneaker or a retro shoulder bag to lean fully into the era's aesthetic.
+
+**2. Soft Pastel Casual**
+* **The Vibe:** Easy, everyday vintage-inspired streetwear.
+* **How to style it:** Play up the pink and purple tones in the butterfly graphic by pairing the tee with a pleated white tennis skirt or light-wash straight-leg jeans. Layer with a thin zip-up hoodie left open and finish the outfit with retro canvas sneakers.
+
+**Color Palette Note:** The white, pink, and purple combination makes this piece very easy to anchor with neutral bottoms (like denim, white, or black) while using accessories in matching pinks or purples to tie the look together.
+Empty outfit: No outfit was provided, so a fit card could not be created.
+```
+
+Additional terminal assertions passed for impossible, blank, and zero-budget
+searches, composite sizes, clothing versus shoe sizes, half-size shoes, waist
+labels, and explicit one-size labels.
+Mocked adapter checks also passed for blank model-response messages,
+`ModelUnavailable` propagation, and zero model calls for an empty outfit.
 
 ---
 

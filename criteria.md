@@ -101,9 +101,8 @@ and item descriptions.
 
 ## Testability review — procedure only, no results
 
-These are AI-drafted criteria and an AI review of how to check their wording;
-they have not been evaluated against the agent. Review the three original
-criteria and their targets before presenting them as your own decisions.
+The following procedures check whether each criterion can be measured from
+its wording. The criteria have not been evaluated against the agent.
 
 1. Use a query known from the data to have a match and the example wardrobe.
    Run it five times, record the three tool calls, and count runs that return

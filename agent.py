@@ -13,7 +13,7 @@ Build and test your three tools in `tools.py` first. Then come here.
     python agent.py          runs both example paths below
 """
 
-import config
+import re
 import trace
 from tools import search_listings, suggest_outfit, create_fit_card
 from generate import ModelUnavailable
@@ -49,6 +49,23 @@ def new_session(query: str, wardrobe: dict) -> dict:
 
 # ── planning loop ─────────────────────────────────────────────────────────────
 
+def _parse_query(query: str) -> dict:
+    """Extract explicit budget and size labels; use the remaining item words."""
+    price_pattern = r"\b(?:under|below|up to|max(?:imum)?(?: price)?|budget(?: of)?)\s*\$?\s*(\d+(?:\.\d{1,2})?)\b"
+    size_pattern = r"\b(?:in\s+)?size\s+(ONE\s+SIZE|W\d+(?:\s+L\d+)?|(?:US\s*)?\d+(?:\.\d+)?|(?:XXXS|XXS|XS|XXXL|XXL|XL|S|M|L)(?:/(?:XXXS|XXS|XS|XXXL|XXL|XL|S|M|L))?)\b"
+    price = re.search(price_pattern, query, re.I)
+    size = re.search(size_pattern, query, re.I)
+    description = re.sub(price_pattern, " ", query, flags=re.I)
+    description = re.sub(size_pattern, " ", description, flags=re.I)
+    description = re.sub(r"^\s*(?:looking for|find me|find|a|an)\s+", "", description, flags=re.I)
+    description = re.sub(r"\s+", " ", description).strip(" ,;")
+    return {
+        "description": description,
+        "size": size.group(1).upper() if size else None,
+        "max_price": float(price.group(1)) if price else None,
+    }
+
+
 def run_agent(query: str, wardrobe: dict) -> dict:
     """
     Run the loop once and return the finished session.
@@ -64,7 +81,7 @@ def run_agent(query: str, wardrobe: dict) -> dict:
         the run ended early and the later fields will still be None.
 
     ─────────────────────────────────────────────────────────────────────────
-    TODO — build this, following the branch rule you wrote in Milestone 2.
+    Implementation follows the branch rule written in Milestone 2.
 
       1. Start a session with new_session().
 
@@ -107,9 +124,35 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     """
     session = new_session(query, wardrobe)
 
-    # TODO: delete these two lines and build the loop.
-    session["error"] = "The planning loop isn't built yet — see the TODO in agent.py."
-    return session
+    stage = "parse"
+    iterations = 0
+    while True:
+        iterations += 1
+        trace.check_iterations(iterations)
+
+        if stage == "parse":
+            session["parsed"] = _parse_query(session["query"])
+            stage = "search"
+        elif stage == "search":
+            session["search_results"] = search_listings(**session["parsed"])
+            if not session["search_results"]:
+                session["error"] = (
+                    "No matching listings found. Try different keywords, "
+                    "a different size, or a higher budget."
+                )
+                return session
+            session["selected_item"] = session["search_results"][0]
+            stage = "outfit"
+        elif stage == "outfit":
+            session["outfit_suggestion"] = suggest_outfit(
+                session["selected_item"], session["wardrobe"],
+            )
+            stage = "card"
+        elif stage == "card":
+            session["fit_card"] = create_fit_card(
+                session["outfit_suggestion"], session["selected_item"],
+            )
+            return session
 
 
 # ── running it directly ───────────────────────────────────────────────────────

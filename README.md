@@ -13,8 +13,8 @@
 > python app.py ask 'vintage graphic tee under $30'
 > ```
 >
-> The three tools are implemented and can be tested independently. The planning
-> loop is still a stub until Milestone 5, so `ask` reports that it is not built.
+> The three tools and planning loop are implemented. `ask` searches the local
+> listings, suggests an outfit, and writes a caption, or stops when search is empty.
 >
 > **The rest of this file is your submission.** Fill it in as you go.
 
@@ -97,11 +97,14 @@
 
 **Where it lives:** `agent.py::run_agent`
 
-This is the contract for the loop to be built in Milestone 5; the current function is still a stub.
+The loop uses four stages: parse, search, outfit, and card. Every iteration calls
+`trace.check_iterations()` before running its stage; `config.MAX_ITERATIONS`
+limits the run. An empty search returns after the second stage, while a match
+advances through all four.
 
-**How the query is parsed:** <!-- regex, string splitting, or asking the model — say which -->
+**How the query is parsed:** Regular expressions in `agent.py::_parse_query` extract an explicit price ceiling after `under`, `below`, `up to`, `max`, `maximum`, or `budget`, and a size after `size` (optionally preceded by `in`). Supported size labels include clothing labels and composites, `One Size`, numeric or `US` shoe sizes, and waist/inseam labels such as `W30 L30`. The parser removes those clauses, strips a leading phrase such as `looking for` or `find me`, and uses the remaining text as the description. Omitted filters become `None`; this is a limited parser for these formats, not general natural-language understanding. `under $30` sets an inclusive ceiling of 30.0, as defined in the search contract.
 
-**What moves through the session:** <!-- which fields, in what order -->
+**What moves through the session:** `query` and `wardrobe` initialize the session. Parsing writes `parsed`; search reads `parsed` and writes `search_results`; the first result becomes `selected_item`. Outfit generation reads `selected_item` and `wardrobe` and writes `outfit_suggestion`. Caption generation reads `outfit_suggestion` and the same `selected_item` and writes `fit_card`. An empty search instead sets `error`, leaving `selected_item`, `outfit_suggestion`, and `fit_card` as `None`. Every downstream argument is read back from the session.
 
 ---
 
@@ -115,9 +118,55 @@ This is the contract for the loop to be built in Milestone 5; the current functi
 **One full query**
 
 ```
-$ python app.py ask '...'
+$ python app.py ask 'vintage graphic tee under $30, size M'
 
+  Found:    Y2K Baby Tee — Butterfly Print — $18.0 on depop
+
+  Outfit:   Here is a practical, thrift-styled outfit utilizing the selected listing and your owned wardrobe pieces:
+
+### Outfit: Y2K Streetwear Casual
+
+**The Look:**
+* **Top:** Y2K Baby Tee — Butterfly Print *(Selected Listing)*
+* **Bottoms:** Baggy straight-leg jeans, dark wash *(Owned piece: w_001)*
+* **Outerwear:** Vintage black denim jacket *(Owned piece: w_006)*
+* **Shoes:** Chunky white sneakers *(Owned piece: w_007)*
+* **Accessories:** Black crossbody bag *(Owned piece: w_005)*
+* *Suggestion (Not owned):* Silver chain necklace to complement the Y2K aesthetic
+
+**Why it works:**
+This outfit plays with proportions by balancing the fitted, cropped nature of the butterfly baby tee with the voluminous silhouette of the high-waisted, baggy dark wash jeans. The white in the baby tee ties directly into the chunky white sneakers, creating a cohesive color bridge from top to bottom. Layering the slightly cropped vintage black denim jacket over top keeps the streetwear edge sharp while offering a tonal black foundation that lets the pink and purple butterfly graphic stand out.
+
+  Fit card: Score! I finally found this Y2K Baby Tee — Butterfly Print on Depop for just $18.00. I am styling it today with baggy dark-wash jeans, a black denim jacket, and chunky white sneakers for the ultimate early-2000s streetwear look.
+
+0 model calls this session, 2 served from cache
 ```
+
+**Empty search and state checks**
+
+```text
+$ python app.py ask 'designer ballgown size XXS under $5'
+
+  No matching listings found. Try different keywords, a different size, or a higher budget.
+
+0 model calls this session
+```
+
+Both full session dictionaries were also printed from `run_agent`. Wrappers
+around the real outfit and caption tools captured deep copies of their actual
+inputs without replacing their responses. In the matching run,
+`search_results[0]`, `selected_item`, and both captured `new_item` arguments
+were equal in every field, with ID `lst_002`; the captured caption input also
+equaled `outfit_suggestion`. In the impossible run, neither downstream wrapper
+was called, `search_results` was `[]`, and `selected_item`,
+`outfit_suggestion`, and `fit_card` were all `None`.
+
+These were individual integration checks with development caching enabled,
+not the five-try acceptance evaluation. Additional checks verified parsed
+filters, numeric half-size shoes, waist/inseam labels, optional filters, and
+the iteration guard. Reading the empty-search message as a new user, the next
+actions are concrete: try other item keywords, change the size, or raise the
+budget. No rewrite of the specified message was needed.
 
 **The three tools, tested one at a time**
 

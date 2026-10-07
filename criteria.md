@@ -25,9 +25,10 @@ Given a query that matches at least one listing, the agent completes all three
 tool calls and returns a fit card — in at least 4 of 5 tries.
 
 **Why this target:**
-<!-- Why 4 of 5 and not 5 of 5? Something about your search, probably —
-     "my search is a plain keyword match and some phrasings will miss" is a
-     real answer. -->
+Two steps depend on model responses, which may be empty or fail even when the
+local search finds an item. Four of five requires reliable end-to-end behavior
+while allowing one unsuccessful model-dependent run; five of five would also
+require the external service to succeed every time.
 
 ---
 
@@ -37,66 +38,91 @@ Given a query that matches no listings, the agent stops before calling
 `suggest_outfit` and returns a message naming what to change — 5 of 5 tries.
 
 **Why this target:**
-<!-- Why is 5 of 5 reasonable here when criterion 1 isn't? What's different
-     about this path? -->
+This path depends on a deterministic empty-list check and should make no model
+requests. Five of five is appropriate because one attempt to style a nonexistent
+item means the branch is unsafe, rather than normal variation in model wording.
 
 ---
 
-## 3. Something about state
+## 3. The selected listing reaches both downstream tools unchanged
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know that the item your search found is the same item the
-     next tool received? Name something countable or observable.
-
-     This is the criterion people find hardest, because state failure doesn't
-     look like state failure — it looks like a tool problem. Something that
-     compares session["selected_item"] against what actually reached
-     suggest_outfit is the shape you're after. -->
-
-
+Given the query `vintage graphic tee under $30, size M` and the example
+wardrobe, the full listing dictionary in `session["search_results"][0]`,
+`session["selected_item"]`, the actual `new_item` argument received by
+`suggest_outfit`, and the actual `new_item` argument received by
+`create_fit_card` must all be equal, including their `id`, with no second
+request for the user to enter the item — in 5 of 5 tries. A missing downstream
+call or a missing selected item counts as a failure.
 
 **Why this target:**
-
-
+Passing a stored dictionary between functions is controlled by the code, not
+by model wording, so all five runs must preserve it. Comparing all fields at
+the actual call boundaries catches an altered price or size even if the ID
+still matches; comparing only the final session would miss that mistake.
 
 ---
 
-## 4. Something about the fit card
+## 4. The fit card is short and grounded in the selected listing
 
-<!-- YOU WRITE THIS ONE.
-
-     The fit card calls a model, so the same input can produce different words
-     each time. That's not a bug — it's the nature of the tool. So what would
-     make it acceptable?
-
-     Think about what you'd actually be unhappy to see. A caption that never
-     mentions the price? Two different items producing the same opening
-     sentence? A card longer than a caption anyone would post? Any of those can
-     be turned into a number. -->
-
-
+Given the query `vintage graphic tee under $30, size M` and the example
+wardrobe, the returned `session["fit_card"]` must contain 25–90
+whitespace-separated words, the selected listing's complete title
+(case-insensitive), its correct dollar price (for example, `$18` or `$18.00`
+for a price of 18.0), and its platform name exactly once as a complete word
+(case-insensitive) — in at least 4 of 5 tries with response caching disabled.
+A crash, early stop, or missing fit card counts as a failure.
 
 **Why this target:**
-
-
+The length range allows a few conversational sentences while preventing a
+long product description. The title, price, and platform make the find
+identifiable; four of five allows one model formatting miss without accepting
+captions that routinely omit or invent listing facts.
 
 ---
 
-## 5. Your choice
+## 5. Search respects the budget and includes its boundary
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. Speed, the empty
-     wardrobe path, what happens when the model can't be reached, whether the
-     search respects a price ceiling — anything, as long as it names a number
-     or an observable outcome. -->
-
-
+For five direct `search_listings` calls with `size=None`, using respectively
+(`description`, `max_price`, expected boundary item ID):
+(`graphic tee`, 18.0, `lst_002`), (`graphic tee`, 24.0, `lst_006`),
+(`band tee`, 19.0, `lst_033`), (`denim jacket`, 42.0, `lst_007`), and
+(`silk slip dress`, 30.0, `lst_013`), every returned listing must have
+`price <= max_price` and the expected boundary item must be present —
+5 of 5 calls. An empty result or an exception counts as a failure.
 
 **Why this target:**
+The budget is a hard constraint applied to numeric local data, so model
+variation is no reason to exceed it. Requiring the known item priced exactly
+at each ceiling also catches an exclusive comparison or a search that returns
+nothing just to avoid over-budget results; five cases cover multiple prices
+and item descriptions.
 
+---
 
+## Testability review — procedure only, no results
+
+These are AI-drafted criteria and an AI review of how to check their wording;
+they have not been evaluated against the agent. Review the three original
+criteria and their targets before presenting them as your own decisions.
+
+1. Use a query known from the data to have a match and the example wardrobe.
+   Run it five times, record the three tool calls, and count runs that return
+   a fit card. At least four must complete all three calls.
+2. Use a query with no matching listing and run it five times. Capture calls
+   to `suggest_outfit` and inspect the returned message. All five must stop
+   without calling that tool and name something the user could change.
+3. Run the stated query five times. Capture a deep copy of each tool's actual
+   `new_item` argument at entry, then compare those copies to the first search
+   result and selected item. Record any user-input request. All four listing
+   dictionaries must agree in every run, with both calls present and no re-entry.
+4. Disable caching and run the stated query five times. For each fit card,
+   count words using whitespace splitting, check the full title ignoring case,
+   check a dollar amount equal to the selected price, and count complete-word
+   occurrences of the platform name ignoring case. At least four cards must
+   meet every requirement.
+5. Make the five specified direct search calls. Inspect every returned price
+   and check that each specified boundary ID is present in its result list.
+   All five calls must satisfy both checks.
 
 ---
 

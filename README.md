@@ -278,28 +278,201 @@ Mocked adapter checks also passed for blank model-response messages,
 
 ## Run Log — Before
 
-<!-- Five criteria, five tries each, in this exact format.
+The original criteria and targets in `criteria.md` are unchanged. Ran
+`python run_eval.py --label before`: five separate tries for each of five
+criteria, caching off, temperature 0.9, the existing model and data. Criteria
+1, 3, and 4 each have their own five end-to-end runs (30 real model calls
+in total). Criterion 2 makes no model calls. Criterion 5 uses its five
+specified different direct calls, one per try. No responses were mocked.
 
-     Five, because your criteria are written out of five. Mark each try PASS
-     or FAIL, count the passes, and read that count against your target — a
-     row targeting 4 of 5 with three PASS cells is MISSED (3/5).
+`run_eval.py::run_once` observes the real functions using forwarding wrappers
+and copies actual arguments at entry; it also records any attempted item
+re-entry. `eval_checks.py::check` applies the filed requirements to the saved
+JSON. The counts and actual outputs were reviewed against the original wording.
 
-     `python run_eval.py --label before` runs everything and writes the table
-     into results/. Paste it here and fill in the verdicts. -->
+Full evidence: [baseline run](results/run_2026-10-13_1519_before.md),
+[raw sessions and call arguments](results/run_2026-10-13_1519_before.json),
+and [per-try checks](results/run_2026-10-13_1519_before_checks.json).
 
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. Three-tool completion | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 2. Empty-search branch | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 3. Listing handoff | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 4. Short grounded fit card | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 5. Inclusive budget boundary | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
 
-**Real output from one try**, pasted as text, naming the file and function
-that produced it:
+### Real output from one try per criterion
 
+**Criterion 1, try 1** (`tools.py::create_fit_card`, returned through `agent.py::run_agent`):
+
+```text
+Scored this sweet Y2K Baby Tee — Butterfly Print while scrolling on depop for just $18.00. I am styling it with baggy dark wash jeans and a vintage black denim jacket for an effortless streetwear contrast. Finished the look with chunky white sneakers and my favorite black crossbody bag.
 ```
 
+**Criterion 2, try 1** (`agent.py::run_agent`, empty-search branch):
+
+```text
+No matching listings found. Try different keywords, a different size, or a higher budget.
+```
+
+**Criterion 3, try 1** (`run_eval.py::run_once` captured these real call-boundary values):
+
+```json
+{
+  "search_results[0]": {
+    "id": "lst_002",
+    "title": "Y2K Baby Tee — Butterfly Print",
+    "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+    "category": "tops",
+    "style_tags": [
+      "y2k",
+      "vintage",
+      "graphic tee",
+      "cottagecore"
+    ],
+    "size": "S/M",
+    "condition": "excellent",
+    "price": 18.0,
+    "colors": [
+      "white",
+      "pink",
+      "purple"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  "selected_item": {
+    "id": "lst_002",
+    "title": "Y2K Baby Tee — Butterfly Print",
+    "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+    "category": "tops",
+    "style_tags": [
+      "y2k",
+      "vintage",
+      "graphic tee",
+      "cottagecore"
+    ],
+    "size": "S/M",
+    "condition": "excellent",
+    "price": 18.0,
+    "colors": [
+      "white",
+      "pink",
+      "purple"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  "suggest_outfit.new_item": {
+    "id": "lst_002",
+    "title": "Y2K Baby Tee — Butterfly Print",
+    "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+    "category": "tops",
+    "style_tags": [
+      "y2k",
+      "vintage",
+      "graphic tee",
+      "cottagecore"
+    ],
+    "size": "S/M",
+    "condition": "excellent",
+    "price": 18.0,
+    "colors": [
+      "white",
+      "pink",
+      "purple"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  "create_fit_card.new_item": {
+    "id": "lst_002",
+    "title": "Y2K Baby Tee — Butterfly Print",
+    "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+    "category": "tops",
+    "style_tags": [
+      "y2k",
+      "vintage",
+      "graphic tee",
+      "cottagecore"
+    ],
+    "size": "S/M",
+    "condition": "excellent",
+    "price": 18.0,
+    "colors": [
+      "white",
+      "pink",
+      "purple"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  "input_requests": []
+}
+```
+
+**Criterion 4, try 1** (`tools.py::create_fit_card`, returned through `agent.py::run_agent`):
+
+```text
+I finally scored this Y2K Baby Tee — Butterfly Print on depop for just $18.00! I am planning to style it with some baggy straight-leg jeans and chunky white sneakers for the ultimate effortless streetwear look. It has the cutest fitted crop length and fits like an absolute dream.
+```
+
+**Criterion 5, try 1** (`tools.py::search_listings`, direct call):
+
+```json
+{
+  "tool": "search_listings (direct)",
+  "inputs": {
+    "description": "graphic tee",
+    "size": null,
+    "max_price": 18.0
+  },
+  "returned": [
+    {
+      "id": "lst_017",
+      "title": "Mesh Long-Sleeve Top — Black",
+      "description": "Sheer black mesh long-sleeve. Great for layering under a graphic tee or over a bralette. Stretchy material, fits true to size.",
+      "category": "tops",
+      "style_tags": [
+        "y2k",
+        "grunge",
+        "goth",
+        "layering"
+      ],
+      "size": "S/M",
+      "condition": "excellent",
+      "price": 15.0,
+      "colors": [
+        "black"
+      ],
+      "brand": null,
+      "platform": "depop"
+    },
+    {
+      "id": "lst_002",
+      "title": "Y2K Baby Tee — Butterfly Print",
+      "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+      "category": "tops",
+      "style_tags": [
+        "y2k",
+        "vintage",
+        "graphic tee",
+        "cottagecore"
+      ],
+      "size": "S/M",
+      "condition": "excellent",
+      "price": 18.0,
+      "colors": [
+        "white",
+        "pink",
+        "purple"
+      ],
+      "brand": null,
+      "platform": "depop"
+    }
+  ]
+}
 ```
 
 ---
@@ -342,7 +515,7 @@ Milestone 2: the commands below ran with the existing model, data, and key.
 The trace prints complete inputs and returned values rather than shortened
 summaries. Each run resets its trace; MCP search is explicitly named.
 
-**Happy path** ? `python app.py ask 'vintage graphic tee under $30, size M' --trace`
+**Happy path** - `python app.py ask 'vintage graphic tee under $30, size M' --trace`
 
 ```text
 [1] parse_query
@@ -779,7 +952,7 @@ This outfit plays with proportions by balancing the fitted, cropped nature of th
 0 model calls this session, 2 served from cache
 ```
 
-**Empty search** ? `python app.py ask 'designer ballgown size XXS under $5' --trace`
+**Empty search** - `python app.py ask 'designer ballgown size XXS under $5' --trace`
 
 ```text
 [1] parse_query

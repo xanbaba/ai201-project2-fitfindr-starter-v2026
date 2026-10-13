@@ -13,40 +13,27 @@ Three scenarios are filled in to show the shape. Add or change whatever your
 own criteria need — these are a starting point, not a fixed set.
 """
 
+# Criterion 5 deliberately uses five DIFFERENT direct calls, as filed in
+# criteria.md. The runner chooses one case per try, rather than five per try.
+BUDGET_CASES = [
+    {"description": "graphic tee", "max_price": 18.0, "boundary_id": "lst_002"},
+    {"description": "graphic tee", "max_price": 24.0, "boundary_id": "lst_006"},
+    {"description": "band tee", "max_price": 19.0, "boundary_id": "lst_033"},
+    {"description": "denim jacket", "max_price": 42.0, "boundary_id": "lst_007"},
+    {"description": "silk slip dress", "max_price": 30.0, "boundary_id": "lst_013"},
+]
+
 SCENARIOS = [
-    {
-        # A query the data can match. Criterion 1.
-        "name": "matching query completes",
-        "query": "vintage graphic tee under $30",
-        "wardrobe": "example",
-        "criterion": 1,
-    },
-    {
-        # A query nothing can match. Criterion 2 — the branch.
-        "name": "impossible query stops early",
-        "query": "designer ballgown size XXS under $5",
-        "wardrobe": "example",
-        "criterion": 2,
-    },
-    {
-        # A user with nothing saved. One of unit 4's three failure modes.
-        "name": "empty wardrobe",
-        "query": "denim jacket under $50",
-        "wardrobe": "empty",
-        "criterion": None,
-    },
-    # TODO: add what your criteria 3, 4 and 5 need.
-    #
-    # Set "criterion" to the number in criteria.md that the scenario tests.
-    # "criterion": None means a diagnostic run — useful to have, but it isn't
-    # one of your five, and run_eval.py marks it as such in the table.
-    #
-    # For a state criterion, any normal query works — what you're checking is
-    # what ends up in the session, not what the user typed.
-    #
-    # For a fit-card criterion, you probably want the SAME query listed more
-    # than once, or several different items, depending on what your criterion
-    # actually says.
+    {"name": "matching query completes", "query": "vintage graphic tee under $30",
+     "wardrobe": "example", "criterion": 1},
+    {"name": "impossible query stops early", "query": "designer ballgown size XXS under $5",
+     "wardrobe": "example", "criterion": 2},
+    {"name": "selected listing reaches both tools unchanged",
+     "query": "vintage graphic tee under $30, size M", "wardrobe": "example", "criterion": 3},
+    {"name": "short grounded fit card", "query": "vintage graphic tee under $30, size M",
+     "wardrobe": "example", "criterion": 4},
+    {"name": "inclusive budget boundaries", "query": "five direct cases from criteria.md",
+     "wardrobe": "example", "criterion": 5, "kind": "direct_search"},
 ]
 
 WARDROBES = ("example", "empty")

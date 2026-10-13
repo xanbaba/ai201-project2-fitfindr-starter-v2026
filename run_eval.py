@@ -32,12 +32,15 @@ import argparse
 import datetime as dt
 import sys
 import traceback
+import copy
+import json
+from unittest.mock import patch
 
 import config
 import scenarios as scenario_module
 
 
-def run_once(scenario, use_trace=True):
+def run_once(scenario, use_trace=True, attempt=1):
     """One scenario, one try. Returns everything worth recording."""
     from agent import run_agent
     from utils.data_loader import get_example_wardrobe, get_empty_wardrobe
@@ -50,15 +53,48 @@ def run_once(scenario, use_trace=True):
     if use_trace:
         trace_module.start_trace()
 
-    record = {"error": None, "session": None, "trace": "", "crashed": None}
+    record = {"error": None, "session": None, "trace": "", "crashed": None,
+              "calls": [], "input_requests": []}
+    import agent
+    import generate
+    calls_before = generate.call_count()
+    def capture(name, function):
+        def wrapped(*args, **kwargs):
+            import inspect
+            bound = inspect.signature(function).bind(*args, **kwargs)
+            call = {"tool": name, "inputs": copy.deepcopy(dict(bound.arguments))}
+            record["calls"].append(call)
+            result = function(*args, **kwargs)
+            call["returned"] = copy.deepcopy(result)
+            return result
+        return wrapped
+
+    def unexpected_input(prompt=""):
+        record["input_requests"].append(prompt)
+        raise RuntimeError("Evaluation must not request item re-entry")
+
     try:
-        record["session"] = run_agent(scenario["query"], wardrobe)
+        if scenario.get("kind") == "direct_search":
+            from tools import search_listings
+            case = scenario_module.BUDGET_CASES[(attempt - 1) % 5]
+            record["direct_case"] = case
+            inputs = {"description": case["description"], "size": None, "max_price": case["max_price"]}
+            results = capture("search_listings (direct)", search_listings)(**inputs)
+            record["session"] = {"search_results": results}
+            trace_module.step("search_listings (direct)", inputs=inputs, returned=results)
+        else:
+            with patch.object(agent, "call_tool", capture("search_listings (via MCP)", agent.call_tool)), \
+                 patch.object(agent, "suggest_outfit", capture("suggest_outfit", agent.suggest_outfit)), \
+                 patch.object(agent, "create_fit_card", capture("create_fit_card", agent.create_fit_card)), \
+                 patch("builtins.input", unexpected_input):
+                record["session"] = run_agent(scenario["query"], wardrobe)
     except Exception as exc:  # noqa: BLE001 — a crash is a result worth logging
         record["crashed"] = f"{type(exc).__name__}: {exc}"
         record["traceback"] = traceback.format_exc()
 
     if use_trace:
         record["trace"] = trace_module.get_trace()
+    record["model_calls"] = generate.call_count() - calls_before
 
     return record
 
@@ -95,7 +131,7 @@ def main():
 
         tries = []
         for attempt in range(1, args.tries + 1):
-            record = run_once(scenario)
+            record = run_once(scenario, attempt=attempt)
             tries.append(record)
 
             if record["crashed"]:
@@ -119,6 +155,11 @@ def write_report(rows, args):
     stamp = dt.datetime.now().strftime("%Y-%m-%d_%H%M")
     label = f"_{args.label}" if args.label else ""
     path = config.RESULTS_DIR / f"run_{stamp}{label}.md"
+    path.with_suffix(".json").write_text(json.dumps({
+        "label": args.label, "cache_enabled": config.CACHE_ENABLED,
+        "model": config.MODEL, "temperature": config.TEMPERATURE,
+        "rows": rows,
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
 
     n = args.tries
     headers = " | ".join(f"Try {i}" for i in range(1, n + 1))
@@ -179,6 +220,10 @@ def write_report(rows, args):
         for i, record in enumerate(row["tries"], 1):
             lines.append(f"**Try {i}**")
             lines.append("")
+            lines += ["Actual call-boundary evidence (real functions, observed with wrappers):", "",
+                      "```json", json.dumps({"calls": record["calls"],
+                      "input_requests": record["input_requests"], "model_calls": record["model_calls"],
+                      "direct_case": record.get("direct_case")}, ensure_ascii=False, indent=2), "```", ""]
 
             if record["crashed"]:
                 lines += ["Crashed:", "", "```", record["crashed"], "```", ""]

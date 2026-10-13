@@ -226,6 +226,9 @@ def create_fit_card(outfit: str, new_item: dict) -> str:
         "once, and its platform name exactly once. Describe a specific outfit "
         "or vibe from the styling text. Avoid headings, hashtags, invented "
         "brands, or invented listing facts.\n"
+        "Do not imply you have tried the item on or know how it fits the wearer. "
+        "Mention fit only as a qualified detail explicitly stated in the listing; "
+        "do not add claims such as 'fits like a dream' or 'fits perfectly'.\n"
         f"Selected listing: {item_text}\n"
         f"Price to use: ${new_item['price']:.2f}\n"
         f"Styling text: {outfit}",

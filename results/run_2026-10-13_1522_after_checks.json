@@ -1,0 +1,391 @@
+[
+  {
+    "criterion": 1,
+    "name": "Three-tool completion",
+    "target": 4,
+    "passes": 5,
+    "verdict": "MET (5/5)",
+    "tries": [
+      {
+        "pass": true,
+        "facts": {
+          "tool_order": [
+            "search_listings (via MCP)",
+            "suggest_outfit",
+            "create_fit_card"
+          ],
+          "returned_fit_card": true,
+          "stopped": false,
+          "fallback": false
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "tool_order": [
+            "search_listings (via MCP)",
+            "suggest_outfit",
+            "create_fit_card"
+          ],
+          "returned_fit_card": true,
+          "stopped": false,
+          "fallback": false
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "tool_order": [
+            "search_listings (via MCP)",
+            "suggest_outfit",
+            "create_fit_card"
+          ],
+          "returned_fit_card": true,
+          "stopped": false,
+          "fallback": false
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "tool_order": [
+            "search_listings (via MCP)",
+            "suggest_outfit",
+            "create_fit_card"
+          ],
+          "returned_fit_card": true,
+          "stopped": false,
+          "fallback": false
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "tool_order": [
+            "search_listings (via MCP)",
+            "suggest_outfit",
+            "create_fit_card"
+          ],
+          "returned_fit_card": true,
+          "stopped": false,
+          "fallback": false
+        }
+      }
+    ]
+  },
+  {
+    "criterion": 2,
+    "name": "Empty-search branch",
+    "target": 5,
+    "passes": 5,
+    "verdict": "MET (5/5)",
+    "tries": [
+      {
+        "pass": true,
+        "facts": {
+          "tool_order": [
+            "search_listings (via MCP)"
+          ],
+          "search_empty": true,
+          "message": "No matching listings found. Try different keywords, a different size, or a higher budget.",
+          "names_next_action": true
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "tool_order": [
+            "search_listings (via MCP)"
+          ],
+          "search_empty": true,
+          "message": "No matching listings found. Try different keywords, a different size, or a higher budget.",
+          "names_next_action": true
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "tool_order": [
+            "search_listings (via MCP)"
+          ],
+          "search_empty": true,
+          "message": "No matching listings found. Try different keywords, a different size, or a higher budget.",
+          "names_next_action": true
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "tool_order": [
+            "search_listings (via MCP)"
+          ],
+          "search_empty": true,
+          "message": "No matching listings found. Try different keywords, a different size, or a higher budget.",
+          "names_next_action": true
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "tool_order": [
+            "search_listings (via MCP)"
+          ],
+          "search_empty": true,
+          "message": "No matching listings found. Try different keywords, a different size, or a higher budget.",
+          "names_next_action": true
+        }
+      }
+    ]
+  },
+  {
+    "criterion": 3,
+    "name": "Listing handoff",
+    "target": 5,
+    "passes": 5,
+    "verdict": "MET (5/5)",
+    "tries": [
+      {
+        "pass": true,
+        "facts": {
+          "all_four_dictionaries_equal": true,
+          "ids": [
+            "lst_002",
+            "lst_002",
+            "lst_002",
+            "lst_002"
+          ],
+          "input_requests": []
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "all_four_dictionaries_equal": true,
+          "ids": [
+            "lst_002",
+            "lst_002",
+            "lst_002",
+            "lst_002"
+          ],
+          "input_requests": []
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "all_four_dictionaries_equal": true,
+          "ids": [
+            "lst_002",
+            "lst_002",
+            "lst_002",
+            "lst_002"
+          ],
+          "input_requests": []
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "all_four_dictionaries_equal": true,
+          "ids": [
+            "lst_002",
+            "lst_002",
+            "lst_002",
+            "lst_002"
+          ],
+          "input_requests": []
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "all_four_dictionaries_equal": true,
+          "ids": [
+            "lst_002",
+            "lst_002",
+            "lst_002",
+            "lst_002"
+          ],
+          "input_requests": []
+        }
+      }
+    ]
+  },
+  {
+    "criterion": 4,
+    "name": "Short grounded fit card",
+    "target": 4,
+    "passes": 5,
+    "verdict": "MET (5/5)",
+    "tries": [
+      {
+        "pass": true,
+        "facts": {
+          "word_count": 32,
+          "complete_title_present": true,
+          "correct_dollar_price": true,
+          "platform_occurrences": 1
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "word_count": 59,
+          "complete_title_present": true,
+          "correct_dollar_price": true,
+          "platform_occurrences": 1
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "word_count": 53,
+          "complete_title_present": true,
+          "correct_dollar_price": true,
+          "platform_occurrences": 1
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "word_count": 57,
+          "complete_title_present": true,
+          "correct_dollar_price": true,
+          "platform_occurrences": 1
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "word_count": 46,
+          "complete_title_present": true,
+          "correct_dollar_price": true,
+          "platform_occurrences": 1
+        }
+      }
+    ]
+  },
+  {
+    "criterion": 5,
+    "name": "Inclusive budget boundary",
+    "target": 5,
+    "passes": 5,
+    "verdict": "MET (5/5)",
+    "tries": [
+      {
+        "pass": true,
+        "facts": {
+          "case": {
+            "description": "graphic tee",
+            "max_price": 18.0,
+            "boundary_id": "lst_002"
+          },
+          "returned_ids": [
+            "lst_017",
+            "lst_002"
+          ],
+          "returned_prices": [
+            15.0,
+            18.0
+          ],
+          "all_within_budget": true,
+          "boundary_present": true
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "case": {
+            "description": "graphic tee",
+            "max_price": 24.0,
+            "boundary_id": "lst_006"
+          },
+          "returned_ids": [
+            "lst_017",
+            "lst_002",
+            "lst_033",
+            "lst_006"
+          ],
+          "returned_prices": [
+            15.0,
+            18.0,
+            19.0,
+            24.0
+          ],
+          "all_within_budget": true,
+          "boundary_present": true
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "case": {
+            "description": "band tee",
+            "max_price": 19.0,
+            "boundary_id": "lst_033"
+          },
+          "returned_ids": [
+            "lst_033",
+            "lst_017",
+            "lst_002"
+          ],
+          "returned_prices": [
+            19.0,
+            15.0,
+            18.0
+          ],
+          "all_within_budget": true,
+          "boundary_present": true
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "case": {
+            "description": "denim jacket",
+            "max_price": 42.0,
+            "boundary_id": "lst_007"
+          },
+          "returned_ids": [
+            "lst_007",
+            "lst_016",
+            "lst_038",
+            "lst_037",
+            "lst_032",
+            "lst_001"
+          ],
+          "returned_prices": [
+            42.0,
+            24.0,
+            27.0,
+            30.0,
+            33.0,
+            38.0
+          ],
+          "all_within_budget": true,
+          "boundary_present": true
+        }
+      },
+      {
+        "pass": true,
+        "facts": {
+          "case": {
+            "description": "silk slip dress",
+            "max_price": 30.0,
+            "boundary_id": "lst_013"
+          },
+          "returned_ids": [
+            "lst_013",
+            "lst_029"
+          ],
+          "returned_prices": [
+            30.0,
+            28.0
+          ],
+          "all_within_budget": true,
+          "boundary_present": true
+        }
+      }
+    ]
+  }
+]

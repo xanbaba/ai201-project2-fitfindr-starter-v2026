@@ -1,0 +1,11 @@
+{
+  "scope": "Criterion 4 five saved captions per label; diagnostic only, not a new acceptance criterion",
+  "before": {
+    "unsupported_dream_claim": 1,
+    "qualified_listing_fit_note": 0
+  },
+  "after": {
+    "unsupported_dream_claim": 0,
+    "qualified_listing_fit_note": 4
+  }
+}

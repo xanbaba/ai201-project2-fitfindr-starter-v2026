@@ -49,7 +49,9 @@ def check(number, record):
                  "input_requests": record["input_requests"]}
         return equal and not record["input_requests"], facts
     if number == 4:
-        prices = re.findall(r"\$\s*(\d+(?:\.\d+)?)(?![\d.])", card)
+        # A sentence-ending period after $18.00 is punctuation, not part of
+        # the amount. Capture the whole decimal before comparing its value.
+        prices = re.findall(r"\$\s*(\d+(?:\.\d+)?)", card)
         platform = item.get("platform", "")
         facts = {"word_count": len(card.split()),
                  "complete_title_present": bool(item) and item["title"].lower() in card.lower(),

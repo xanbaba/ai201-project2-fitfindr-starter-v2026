@@ -1036,31 +1036,234 @@ difference was observed in the search contract.
 
 ## The Improvement
 
-<!-- What you changed, why your diagnosis pointed at it, and the after-run in
-     the same table format. One change, measured properly.
+**What I changed:** Added one instruction to the prompt in
+`tools.py::create_fit_card`: do not imply a try-on or knowledge of the wearer's
+fit; mention fit only as a qualified detail explicitly supplied by the listing.
+No search logic, outfit prompt, parser, model, temperature, data, session
+behavior, criteria, or targets changed between evaluations. No stretch feature
+was added.
 
-     `python run_eval.py --label after` -->
-
-**What I changed:**
-
-**Which failure it was meant to fix:**
+**Why this change:** The baseline final caption claimed the tee fits like an
+absolute dream. That unsupported assertion came from the caption model; the
+correct listing and its size caveat were already available. The single prompt
+change directly addresses that mechanism.
 
 ### Run Log — After
 
+Ran `python run_eval.py --label after` with the same scenarios, five tries
+per criterion, caching off, and 30 additional actual model requests.
+
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. Three-tool completion | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 2. Empty-search branch | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 3. Listing handoff | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 4. Short grounded fit card | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 5. Inclusive budget boundary | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
 
-**Did it help, and how do I know:**
+Full evidence: [after run](results/run_2026-10-13_1522_after.md),
+[raw sessions and calls](results/run_2026-10-13_1522_after.json), and
+[per-try checks](results/run_2026-10-13_1522_after_checks.json).
 
-<!-- If it made things worse, say that. Honestly reported, that earns full
-     credit and is more interesting than one that worked. -->
+### Before and after side by side
 
+| Criterion | Target | Before | After |
+|---|---|---|---|
+| 1. Three-tool completion | 4 of 5 | MET (5/5) | MET (5/5) |
+| 2. Empty-search branch | 5 of 5 | MET (5/5) | MET (5/5) |
+| 3. Listing handoff | 5 of 5 | MET (5/5) | MET (5/5) |
+| 4. Short grounded fit card | 4 of 5 | MET (5/5) | MET (5/5) |
+| 5. Inclusive budget boundary | 5 of 5 | MET (5/5) | MET (5/5) |
 
+**Did it help:** There was no improvement in acceptance counts: all five
+criteria stayed at 5/5. The qualitative issue improved in this small sample:
+the unsupported dream-fit assertion appeared in 1/5 baseline criterion-4
+captions and 0/5 after captions. Qualified statements of the listing's
+fits-like-a-small caveat appeared in 0/5 before and 4/5 after. These separate
+observations do not revise any original criterion or prove the prompt always
+works. Model variation is an alternative explanation with only five tries.
+The observed change is useful, but no broader reliability claim is warranted.
+Counts are saved in [improvement observation](results/improvement-observation.json).
+
+**Scoring review:** A preliminary price check incorrectly treated the period
+in `$18.00.` as part of an invalid amount. The checker was corrected to compare
+the numeric currency amount, and both saved datasets were rescored with the
+same corrected check. The agent was not rerun or changed for this repair;
+criterion 4's original requirement always allowed the correct price followed
+by sentence punctuation. No target was loosened.
+
+### Real after output from one try per criterion
+
+**Criterion 1, try 1** (`tools.py::create_fit_card`, through `agent.py::run_agent`):
+
+```text
+Just scored this Y2K Baby Tee — Butterfly Print on Depop for $18.00! I love the early 2000s butterfly graphic against the white, pink, and purple fabric. The listing notes it has a fitted crop length and a tag size medium that fits like a small. I am planning to style it with baggy dark wash straight-leg jeans, retro platform sandals, and a simple black crossbody bag for a classic streetwear look.
+```
+
+**Criterion 2, try 1** (`agent.py::run_agent`, empty branch):
+
+```text
+No matching listings found. Try different keywords, a different size, or a higher budget.
+```
+
+**Criterion 3, try 1** (`run_eval.py::run_once`, observed real tool-entry arguments):
+
+```json
+{
+  "search_results[0]": {
+    "id": "lst_002",
+    "title": "Y2K Baby Tee — Butterfly Print",
+    "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+    "category": "tops",
+    "style_tags": [
+      "y2k",
+      "vintage",
+      "graphic tee",
+      "cottagecore"
+    ],
+    "size": "S/M",
+    "condition": "excellent",
+    "price": 18.0,
+    "colors": [
+      "white",
+      "pink",
+      "purple"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  "selected_item": {
+    "id": "lst_002",
+    "title": "Y2K Baby Tee — Butterfly Print",
+    "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+    "category": "tops",
+    "style_tags": [
+      "y2k",
+      "vintage",
+      "graphic tee",
+      "cottagecore"
+    ],
+    "size": "S/M",
+    "condition": "excellent",
+    "price": 18.0,
+    "colors": [
+      "white",
+      "pink",
+      "purple"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  "suggest_outfit.new_item": {
+    "id": "lst_002",
+    "title": "Y2K Baby Tee — Butterfly Print",
+    "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+    "category": "tops",
+    "style_tags": [
+      "y2k",
+      "vintage",
+      "graphic tee",
+      "cottagecore"
+    ],
+    "size": "S/M",
+    "condition": "excellent",
+    "price": 18.0,
+    "colors": [
+      "white",
+      "pink",
+      "purple"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  "create_fit_card.new_item": {
+    "id": "lst_002",
+    "title": "Y2K Baby Tee — Butterfly Print",
+    "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+    "category": "tops",
+    "style_tags": [
+      "y2k",
+      "vintage",
+      "graphic tee",
+      "cottagecore"
+    ],
+    "size": "S/M",
+    "condition": "excellent",
+    "price": 18.0,
+    "colors": [
+      "white",
+      "pink",
+      "purple"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  "input_requests": []
+}
+```
+
+**Criterion 4, try 1** (`tools.py::create_fit_card`, through `agent.py::run_agent`):
+
+```text
+Scored this sweet Y2K Baby Tee — Butterfly Print on depop for $18.00. I love how it looks styled with baggy dark wash jeans and chunky sneakers for an easy streetwear vibe.
+```
+
+**Criterion 5, try 1** (`tools.py::search_listings`, direct):
+
+```json
+{
+  "tool": "search_listings (direct)",
+  "inputs": {
+    "description": "graphic tee",
+    "size": null,
+    "max_price": 18.0
+  },
+  "returned": [
+    {
+      "id": "lst_017",
+      "title": "Mesh Long-Sleeve Top — Black",
+      "description": "Sheer black mesh long-sleeve. Great for layering under a graphic tee or over a bralette. Stretchy material, fits true to size.",
+      "category": "tops",
+      "style_tags": [
+        "y2k",
+        "grunge",
+        "goth",
+        "layering"
+      ],
+      "size": "S/M",
+      "condition": "excellent",
+      "price": 15.0,
+      "colors": [
+        "black"
+      ],
+      "brand": null,
+      "platform": "depop"
+    },
+    {
+      "id": "lst_002",
+      "title": "Y2K Baby Tee — Butterfly Print",
+      "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+      "category": "tops",
+      "style_tags": [
+        "y2k",
+        "vintage",
+        "graphic tee",
+        "cottagecore"
+      ],
+      "size": "S/M",
+      "condition": "excellent",
+      "price": 18.0,
+      "colors": [
+        "white",
+        "pink",
+        "purple"
+      ],
+      "brand": null,
+      "platform": "depop"
+    }
+  ]
+}
+```
 
 ---
 

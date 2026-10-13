@@ -269,6 +269,13 @@ Mocked adapter checks also passed for blank model-response messages,
 - *What came back:* Codex implemented a four-stage loop and regex parser, printed the matching and empty sessions, and captured the actual tool arguments. The first search result matched the selected item and both downstream inputs; the impossible query called neither downstream tool and left `fit_card` as `None`.
 - *What I changed:* With Codex's assistance, I replaced the stub in `agent.py::run_agent`, stored each result in the session before the next step read it, and retained the iteration guard. I added the real CLI output, parsing rules, state checks, and empty-search guidance to the Planning Loop and Sample Run sections. Trace instrumentation and MCP changes remain for Unit 4.
 
+**Unit 4: testing and diagnosis**
+
+- *What I asked for:* I told Codex that the MCP milestone was ready and asked it to complete the remaining attached milestones one at a time, commit the work, and push at the end. I will submit the repository myself.
+- *What came back:* Codex added full trace instrumentation and the model-unavailable handler, deliberately exercised the three required failures, built scenarios matching the five pre-existing criteria, captured real call-boundary arguments, and ran the complete uncached before and after evaluations. It drafted the verdicts and diagnoses from the saved results rather than changing targets to manufacture passes.
+- *What changed with AI assistance:* The caption prompt gained one instruction against unsupported personal fit claims. Both evaluations stayed at 5/5 on every original criterion; the separate observed dream-fit claim changed from 1/5 to 0/5. Codex also corrected a currency-checking bug that rejected valid sentence punctuation, applying the correction to both saved datasets. The system's model, data, and original criteria stayed the same.
+- *Limits of this account:* Codex performed these runs and drafted this write-up. This does not claim I personally executed every command, received peer feedback, or consulted Claude. The actionability and opposing-verdict exercises were conducted with Codex; I should read the saved evidence and this explanation before submitting.
+
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 
      Don't fill these in during unit 3.
@@ -293,6 +300,11 @@ JSON. The counts and actual outputs were reviewed against the original wording.
 Full evidence: [baseline run](results/run_2026-10-13_1519_before.md),
 [raw sessions and call arguments](results/run_2026-10-13_1519_before.json),
 and [per-try checks](results/run_2026-10-13_1519_before_checks.json).
+
+The baseline console capture includes PowerShell wrappers around stderr
+rate-limit notices. Those notices were normal pacing, not agent crashes;
+the evaluation finished, saved every record, and made 30 model calls.
+The JSON and Markdown reports preserve the actual run results.
 
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
@@ -1268,6 +1280,27 @@ Scored this sweet Y2K Baby Tee — Butterfly Print on depop for $18.00. I love h
 ---
 
 ## What's Still Broken
+
+No original criterion remains MISSED: after scores are 5/5 for all five.
+There is therefore no failed target left to fix in this unit. That does not
+mean every aspect of FitFindr is correct.
+
+- Search still ranks by keyword overlap, so a mesh top mentioning a graphic tee can outrank an actual tee on some queries. A future change would score title/category relevance more strongly. I stopped here because changing search would be a second system improvement and the filed budget criterion is already met.
+- Caption and outfit facts still depend on model compliance. The single prompt change reduced one observed unsupported fit claim; it does not validate every assertion. A future change would validate generated facts against structured listing/wardrobe data and explicitly test owned-piece references across several items. I stopped at one measured prompt change as required.
+- Evaluation coverage is narrow: the three model-dependent scenarios all use one family of tee queries and the example wardrobe. A future evaluation would add different categories, missing optional fields, and misleading listing text, with targets filed before results. I preserved the original criteria and five-try procedure for this submission.
+- The three required deliberate failures have actionable responses, but this unit did not add recovery from MCP process failures or exhausted provider quota. A future handler could name the failed service and suggest a retry. I retained the supplied adapter and MCP client rather than adding another behavior change.
+
+Milestone 6 verification: the environment check passed 10/10; the MCP server
+lists exactly one tool with the documented inputs; the original `criteria.md`
+is byte-equivalent after newline normalization; both evaluations contain
+five rows of five tries, 30 real model calls each, matching scenarios/model/
+temperature, and no cached evaluation responses. Complete traces and real
+outputs are committed as text. The restored key is absent from tracked files
+and result artifacts. No stretch features were attempted.
+
+The repository URL to submit remains
+https://github.com/xanbaba/ai201-project2-fitfindr-starter-v2026.
+Submission to the course is left to the project owner.
 
 <!-- For each criterion still missed: what you'd do, and why you stopped where
      you did. "I ran out of time" is fine if it's true. Pretending nothing is

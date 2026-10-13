@@ -124,6 +124,7 @@ def run_agent(query: str, wardrobe: dict) -> dict:
         than a stack trace. The import is already at the top of this file.
     """
     session = new_session(query, wardrobe)
+    trace.start_trace()
 
     stage = "parse"
     iterations = 0
@@ -133,26 +134,48 @@ def run_agent(query: str, wardrobe: dict) -> dict:
 
         if stage == "parse":
             session["parsed"] = _parse_query(session["query"])
+            trace.step("parse_query", inputs=session["query"], returned=session["parsed"])
             stage = "search"
         elif stage == "search":
             session["search_results"] = call_tool("search_listings", session["parsed"])
+            trace.step("search_listings (via MCP)", inputs=session["parsed"], returned=session["search_results"])
             if not session["search_results"]:
                 session["error"] = (
                     "No matching listings found. Try different keywords, "
                     "a different size, or a higher budget."
                 )
+                trace.step("branch", returned=session["error"], note="empty search: stop before suggest_outfit")
                 return session
             session["selected_item"] = session["search_results"][0]
+            trace.step("select_item", returned=session["selected_item"], note="use the first search result")
             stage = "outfit"
         elif stage == "outfit":
-            session["outfit_suggestion"] = suggest_outfit(
-                session["selected_item"], session["wardrobe"],
-            )
+            inputs = {"new_item": session["selected_item"], "wardrobe": session["wardrobe"]}
+            try:
+                session["outfit_suggestion"] = suggest_outfit(**inputs)
+            except ModelUnavailable:
+                session["error"] = (
+                    "The model could not be reached while suggesting an outfit. "
+                    "Check your internet connection and GEMINI_API_KEY in .env, "
+                    "then run python test.py and try again."
+                )
+                trace.step("suggest_outfit", inputs=inputs, returned=session["error"], note="model unavailable: stop")
+                return session
+            trace.step("suggest_outfit", inputs=inputs, returned=session["outfit_suggestion"])
             stage = "card"
         elif stage == "card":
-            session["fit_card"] = create_fit_card(
-                session["outfit_suggestion"], session["selected_item"],
-            )
+            inputs = {"outfit": session["outfit_suggestion"], "new_item": session["selected_item"]}
+            try:
+                session["fit_card"] = create_fit_card(**inputs)
+            except ModelUnavailable:
+                session["error"] = (
+                    "The model could not be reached while creating the fit card. "
+                    "Check your internet connection and GEMINI_API_KEY in .env, "
+                    "then run python test.py and try again."
+                )
+                trace.step("create_fit_card", inputs=inputs, returned=session["error"], note="model unavailable: stop")
+                return session
+            trace.step("create_fit_card", inputs=inputs, returned=session["fit_card"])
             return session
 
 

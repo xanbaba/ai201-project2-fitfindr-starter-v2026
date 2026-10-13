@@ -338,34 +338,512 @@ that produced it:
 
 ## Loop Trace
 
-<!-- One full run, printed step by step, with the MCP call visible in it.
+Milestone 2: the commands below ran with the existing model, data, and key.
+The trace prints complete inputs and returned values rather than shortened
+summaries. Each run resets its trace; MCP search is explicitly named.
 
-     `python app.py ask '...' --trace` once you've added the trace.step()
-     calls in Milestone 2.
+**Happy path** ? `python app.py ask 'vintage graphic tee under $30, size M' --trace`
 
-     Worth pasting BOTH the happy path and the empty-search path. The empty
-     one should be visibly shorter, because it stops. If your two traces are
-     the same length, your branch isn't working — and this is the fastest way
-     anyone will ever find that out. -->
+```text
+[1] parse_query
+      in:  "vintage graphic tee under $30, size M"
+      out: {
+  "description": "vintage graphic tee",
+  "size": "M",
+  "max_price": 30.0
+}
+[2] search_listings (via MCP)
+      in:  {
+  "description": "vintage graphic tee",
+  "size": "M",
+  "max_price": 30.0
+}
+      out: [
+  {
+    "id": "lst_002",
+    "title": "Y2K Baby Tee — Butterfly Print",
+    "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+    "category": "tops",
+    "style_tags": [
+      "y2k",
+      "vintage",
+      "graphic tee",
+      "cottagecore"
+    ],
+    "size": "S/M",
+    "condition": "excellent",
+    "price": 18.0,
+    "colors": [
+      "white",
+      "pink",
+      "purple"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  {
+    "id": "lst_017",
+    "title": "Mesh Long-Sleeve Top — Black",
+    "description": "Sheer black mesh long-sleeve. Great for layering under a graphic tee or over a bralette. Stretchy material, fits true to size.",
+    "category": "tops",
+    "style_tags": [
+      "y2k",
+      "grunge",
+      "goth",
+      "layering"
+    ],
+    "size": "S/M",
+    "condition": "excellent",
+    "price": 15.0,
+    "colors": [
+      "black"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  {
+    "id": "lst_020",
+    "title": "Henley Long Sleeve — Washed Burgundy",
+    "description": "Soft washed henley in a rich burgundy. Three-button placket. Slightly shrunken/cropped fit. 100% cotton.",
+    "category": "tops",
+    "style_tags": [
+      "vintage",
+      "basics",
+      "earth tones",
+      "classic"
+    ],
+    "size": "M",
+    "condition": "excellent",
+    "price": 16.0,
+    "colors": [
+      "burgundy",
+      "wine"
+    ],
+    "brand": null,
+    "platform": "thredUp"
+  },
+  {
+    "id": "lst_024",
+    "title": "Vintage Polo Shirt — Forest Green",
+    "description": "Classic polo in forest green. Short sleeve, ribbed collar. Slightly boxy. The kind of piece that goes with everything.",
+    "category": "tops",
+    "style_tags": [
+      "vintage",
+      "preppy",
+      "classic",
+      "earth tones"
+    ],
+    "size": "M",
+    "condition": "good",
+    "price": 18.0,
+    "colors": [
+      "green",
+      "forest green"
+    ],
+    "brand": "Ralph Lauren",
+    "platform": "thredUp"
+  },
+  {
+    "id": "lst_030",
+    "title": "Vintage Knit Vest — Argyle Brown/Cream",
+    "description": "Classic argyle knit vest in brown and cream. Fits medium. V-neck. Ideal for the dark academia or preppy vintage aesthetic.",
+    "category": "tops",
+    "style_tags": [
+      "vintage",
+      "preppy",
+      "knitwear",
+      "dark academia",
+      "earth tones"
+    ],
+    "size": "M",
+    "condition": "good",
+    "price": 25.0,
+    "colors": [
+      "brown",
+      "cream",
+      "tan"
+    ],
+    "brand": null,
+    "platform": "thredUp"
+  },
+  {
+    "id": "lst_038",
+    "title": "Denim Vest — Medium Wash, Studded",
+    "description": "Denim vest with silver stud detailing along the collar and pockets. Classic rock-inspired customization. Fits like a medium.",
+    "category": "outerwear",
+    "style_tags": [
+      "grunge",
+      "vintage",
+      "denim",
+      "customized",
+      "rock"
+    ],
+    "size": "M",
+    "condition": "good",
+    "price": 27.0,
+    "colors": [
+      "medium blue"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  {
+    "id": "lst_029",
+    "title": "Silk Button-Down — Sage Green",
+    "description": "Loose silk (feel) button-down in sage green. Long sleeve, can be worn open as a layer or fully buttoned. Very flowy.",
+    "category": "tops",
+    "style_tags": [
+      "vintage",
+      "minimal",
+      "earth tones",
+      "cottagecore"
+    ],
+    "size": "M",
+    "condition": "excellent",
+    "price": 28.0,
+    "colors": [
+      "sage",
+      "green"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  {
+    "id": "lst_013",
+    "title": "90s Silk Slip Dress — Floral, Midi Length",
+    "description": "Delicate 90s slip dress in a muted floral print. Midi length, adjustable straps. Light snag on the side seam — not visible when worn.",
+    "category": "bottoms",
+    "style_tags": [
+      "90s",
+      "vintage",
+      "feminine",
+      "floral",
+      "cottagecore"
+    ],
+    "size": "M",
+    "condition": "good",
+    "price": 30.0,
+    "colors": [
+      "ivory",
+      "dusty pink",
+      "green"
+    ],
+    "brand": null,
+    "platform": "depop"
+  }
+]
+[3] select_item
+      out: {
+  "id": "lst_002",
+  "title": "Y2K Baby Tee — Butterfly Print",
+  "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+  "category": "tops",
+  "style_tags": [
+    "y2k",
+    "vintage",
+    "graphic tee",
+    "cottagecore"
+  ],
+  "size": "S/M",
+  "condition": "excellent",
+  "price": 18.0,
+  "colors": [
+    "white",
+    "pink",
+    "purple"
+  ],
+  "brand": null,
+  "platform": "depop"
+}
+      →    use the first search result
+[4] suggest_outfit
+      in:  {
+  "new_item": {
+    "id": "lst_002",
+    "title": "Y2K Baby Tee — Butterfly Print",
+    "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+    "category": "tops",
+    "style_tags": [
+      "y2k",
+      "vintage",
+      "graphic tee",
+      "cottagecore"
+    ],
+    "size": "S/M",
+    "condition": "excellent",
+    "price": 18.0,
+    "colors": [
+      "white",
+      "pink",
+      "purple"
+    ],
+    "brand": null,
+    "platform": "depop"
+  },
+  "wardrobe": {
+    "items": [
+      {
+        "id": "w_001",
+        "name": "Baggy straight-leg jeans, dark wash",
+        "category": "bottoms",
+        "colors": [
+          "dark blue",
+          "indigo"
+        ],
+        "style_tags": [
+          "denim",
+          "streetwear",
+          "baggy"
+        ],
+        "notes": "High-waisted, sits above the hip"
+      },
+      {
+        "id": "w_002",
+        "name": "Wide-leg khaki trousers",
+        "category": "bottoms",
+        "colors": [
+          "khaki",
+          "tan"
+        ],
+        "style_tags": [
+          "earth tones",
+          "minimal",
+          "wide-leg"
+        ],
+        "notes": null
+      },
+      {
+        "id": "w_003",
+        "name": "White ribbed tank top",
+        "category": "tops",
+        "colors": [
+          "white"
+        ],
+        "style_tags": [
+          "basics",
+          "minimal",
+          "fitted"
+        ],
+        "notes": "Goes with everything"
+      },
+      {
+        "id": "w_004",
+        "name": "Oversized grey crewneck sweatshirt",
+        "category": "tops",
+        "colors": [
+          "grey",
+          "charcoal"
+        ],
+        "style_tags": [
+          "oversized",
+          "basics",
+          "cozy"
+        ],
+        "notes": "Really oversized — drops below the hip"
+      },
+      {
+        "id": "w_005",
+        "name": "Black cropped zip hoodie",
+        "category": "tops",
+        "colors": [
+          "black"
+        ],
+        "style_tags": [
+          "athletic",
+          "streetwear",
+          "cropped"
+        ],
+        "notes": null
+      },
+      {
+        "id": "w_006",
+        "name": "Vintage black denim jacket",
+        "category": "outerwear",
+        "colors": [
+          "black"
+        ],
+        "style_tags": [
+          "denim",
+          "vintage",
+          "classic"
+        ],
+        "notes": "Slightly cropped"
+      },
+      {
+        "id": "w_007",
+        "name": "Chunky white sneakers",
+        "category": "shoes",
+        "colors": [
+          "white"
+        ],
+        "style_tags": [
+          "sneakers",
+          "chunky",
+          "streetwear"
+        ],
+        "notes": null
+      },
+      {
+        "id": "w_008",
+        "name": "Black combat boots",
+        "category": "shoes",
+        "colors": [
+          "black"
+        ],
+        "style_tags": [
+          "boots",
+          "grunge",
+          "classic"
+        ],
+        "notes": "Lace-up, mid-ankle height"
+      },
+      {
+        "id": "w_009",
+        "name": "Brown leather belt",
+        "category": "accessories",
+        "colors": [
+          "brown"
+        ],
+        "style_tags": [
+          "classic",
+          "earth tones",
+          "accessories"
+        ],
+        "notes": null
+      },
+      {
+        "id": "w_010",
+        "name": "Black crossbody bag",
+        "category": "accessories",
+        "colors": [
+          "black"
+        ],
+        "style_tags": [
+          "minimal",
+          "accessories",
+          "everyday"
+        ],
+        "notes": null
+      }
+    ]
+  }
+}
+      out: "Here is a practical, thrift-styled outfit utilizing the selected listing and your owned wardrobe pieces:\n\n### Outfit: Y2K Streetwear Casual\n\n**The Look:**\n* **Top:** Y2K Baby Tee — Butterfly Print *(Selected Listing)*\n* **Bottoms:** Baggy straight-leg jeans, dark wash *(Owned piece: w_001)*\n* **Outerwear:** Vintage black denim jacket *(Owned piece: w_006)*\n* **Shoes:** Chunky white sneakers *(Owned piece: w_007)*\n* **Accessories:** Black crossbody bag *(Owned piece: w_005)*\n* *Suggestion (Not owned):* Silver chain necklace to complement the Y2K aesthetic\n\n**Why it works:**\nThis outfit plays with proportions by balancing the fitted, cropped nature of the butterfly baby tee with the voluminous silhouette of the high-waisted, baggy dark wash jeans. The white in the baby tee ties directly into the chunky white sneakers, creating a cohesive color bridge from top to bottom. Layering the slightly cropped vintage black denim jacket over top keeps the streetwear edge sharp while offering a tonal black foundation that lets the pink and purple butterfly graphic stand out."
+[5] create_fit_card
+      in:  {
+  "outfit": "Here is a practical, thrift-styled outfit utilizing the selected listing and your owned wardrobe pieces:\n\n### Outfit: Y2K Streetwear Casual\n\n**The Look:**\n* **Top:** Y2K Baby Tee — Butterfly Print *(Selected Listing)*\n* **Bottoms:** Baggy straight-leg jeans, dark wash *(Owned piece: w_001)*\n* **Outerwear:** Vintage black denim jacket *(Owned piece: w_006)*\n* **Shoes:** Chunky white sneakers *(Owned piece: w_007)*\n* **Accessories:** Black crossbody bag *(Owned piece: w_005)*\n* *Suggestion (Not owned):* Silver chain necklace to complement the Y2K aesthetic\n\n**Why it works:**\nThis outfit plays with proportions by balancing the fitted, cropped nature of the butterfly baby tee with the voluminous silhouette of the high-waisted, baggy dark wash jeans. The white in the baby tee ties directly into the chunky white sneakers, creating a cohesive color bridge from top to bottom. Layering the slightly cropped vintage black denim jacket over top keeps the streetwear edge sharp while offering a tonal black foundation that lets the pink and purple butterfly graphic stand out.",
+  "new_item": {
+    "id": "lst_002",
+    "title": "Y2K Baby Tee — Butterfly Print",
+    "description": "Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.",
+    "category": "tops",
+    "style_tags": [
+      "y2k",
+      "vintage",
+      "graphic tee",
+      "cottagecore"
+    ],
+    "size": "S/M",
+    "condition": "excellent",
+    "price": 18.0,
+    "colors": [
+      "white",
+      "pink",
+      "purple"
+    ],
+    "brand": null,
+    "platform": "depop"
+  }
+}
+      out: "Score! I finally found this Y2K Baby Tee — Butterfly Print on Depop for just $18.00. I am styling it today with baggy dark-wash jeans, a black denim jacket, and chunky white sneakers for the ultimate early-2000s streetwear look."
 
-**Happy path**
+  Found:    Y2K Baby Tee — Butterfly Print — $18.0 on depop
+
+  Outfit:   Here is a practical, thrift-styled outfit utilizing the selected listing and your owned wardrobe pieces:
+
+### Outfit: Y2K Streetwear Casual
+
+**The Look:**
+* **Top:** Y2K Baby Tee — Butterfly Print *(Selected Listing)*
+* **Bottoms:** Baggy straight-leg jeans, dark wash *(Owned piece: w_001)*
+* **Outerwear:** Vintage black denim jacket *(Owned piece: w_006)*
+* **Shoes:** Chunky white sneakers *(Owned piece: w_007)*
+* **Accessories:** Black crossbody bag *(Owned piece: w_005)*
+* *Suggestion (Not owned):* Silver chain necklace to complement the Y2K aesthetic
+
+**Why it works:**
+This outfit plays with proportions by balancing the fitted, cropped nature of the butterfly baby tee with the voluminous silhouette of the high-waisted, baggy dark wash jeans. The white in the baby tee ties directly into the chunky white sneakers, creating a cohesive color bridge from top to bottom. Layering the slightly cropped vintage black denim jacket over top keeps the streetwear edge sharp while offering a tonal black foundation that lets the pink and purple butterfly graphic stand out.
+
+  Fit card: Score! I finally found this Y2K Baby Tee — Butterfly Print on Depop for just $18.00. I am styling it today with baggy dark-wash jeans, a black denim jacket, and chunky white sneakers for the ultimate early-2000s streetwear look.
+
+0 model calls this session, 2 served from cache
+```
+
+**Empty search** ? `python app.py ask 'designer ballgown size XXS under $5' --trace`
+
+```text
+[1] parse_query
+      in:  "designer ballgown size XXS under $5"
+      out: {
+  "description": "designer ballgown",
+  "size": "XXS",
+  "max_price": 5.0
+}
+[2] search_listings (via MCP)
+      in:  {
+  "description": "designer ballgown",
+  "size": "XXS",
+  "max_price": 5.0
+}
+      out: []
+[3] branch
+      out: "No matching listings found. Try different keywords, a different size, or a higher budget."
+      →    empty search: stop before suggest_outfit
+
+  No matching listings found. Try different keywords, a different size, or a higher budget.
+
+0 model calls this session
+```
+
+### Deliberately triggered failures
+
+- Empty search: the impossible query above returned `No matching listings found. Try different keywords, a different size, or a higher budget.` No outfit or card call followed.
+- Empty wardrobe: `python app.py ask 'vintage graphic tee under $30, size M' --empty-wardrobe --trace` returned non-empty general advice, starting with `No wardrobe items are saved.` The full real response is pasted below.
+- Model unavailable: changed one character of the actual key in `.env`, disabled caching for that process, and ran the previously unused query `butterfly tee under $29.73, size M`. It made one real model request and returned the message below, with no traceback. The original `.env` was restored byte for byte in a `finally` block. The handler also covers failure at the fit-card step.
+
+```text
+The model could not be reached while suggesting an outfit. Check your internet connection and GEMINI_API_KEY in .env, then run python test.py and try again.
+```
+
+**Empty-wardrobe output** (`tools.py::suggest_outfit`, displayed by `app.py::_ask_one`):
+
+```text
+No wardrobe items are saved. Here are two general styling ideas for this Y2K butterfly baby tee based on its fitted crop silhouette and nostalgic color palette:
+
+**1. The Classic Y2K Streetwear Look**
+* **The Vibe:** Early 2000s mall-goth meets pop princess.
+* **How to style it:** Pair the baby tee with low-rise baggy cargo pants in olive green or classic denim to balance out the fitted crop of the shirt. Add a chunky platform sneaker or a retro shoulder bag to lean fully into the era's aesthetic. 
+
+**2. Soft Pastel Casual**
+* **The Vibe:** Easy, everyday vintage-inspired streetwear.
+* **How to style it:** Play up the pink and purple tones in the butterfly graphic by pairing the tee with a pleated white tennis skirt or light-wash straight-leg jeans. Layer with a thin zip-up hoodie left open and finish the outfit with retro canvas sneakers. 
+
+**Color Palette Note:** The white, pink, and purple combination makes this piece very easy to anchor with neutral bottoms (like denim, white, or black) while using accessories in matching pinks or purples to tie the look together.
 
 ```
 
-```
+AI actionability review (Codex, not Claude): after the first message, change
+keywords, size, or budget; after the second, use the general styling ideas or
+supply saved wardrobe items; after the third, check connection/key, run the
+environment check, and retry. Each leaves a concrete next action. No breakout
+conversation or Claude interaction is claimed.
 
-**Empty search**
-
-```
-
-```
-
-**On the MCP move:** <!-- what changed in your code, and whether anything
-behaved differently afterwards. If the rewire didn't work, say exactly where it
-broke — the error text and the last thing that worked. That earns the point in
-full. -->
-
-
+**On the MCP move:** Milestone 1 registered only `search_listings` in
+`mcp_server.py` and replaced the loop's direct search with
+`mcp_client.call_tool`. The client unwraps MCP results into the original list
+of listing dictionaries. The other two tools still run locally and use the
+same model adapter. This full run completed through MCP; no behavioral
+difference was observed in the search contract.
 
 ---
 

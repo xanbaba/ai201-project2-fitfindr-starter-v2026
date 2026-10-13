@@ -26,6 +26,7 @@ in the step name — `search_listings (via MCP)` is enough.
 """
 
 import config
+import json
 
 _lines: list[str] = []
 _step_number = 0
@@ -69,26 +70,9 @@ def get_trace() -> str:
     return "\n".join(_lines)
 
 
-def _short(value, limit: int = 110) -> str:
-    """Keep the trace readable. A 40-item list of dicts is not readable."""
-    if isinstance(value, list):
-        if not value:
-            return "[] (empty)"
-        head = value[0]
-        if isinstance(head, dict) and "title" in head:
-            titles = ", ".join(str(v.get("title", "?")) for v in value[:3])
-            more = f" … +{len(value) - 3} more" if len(value) > 3 else ""
-            return f"{len(value)} items: {titles}{more}"
-        return f"{len(value)} items: {str(head)[:60]}…"
-
-    if isinstance(value, dict):
-        if "title" in value:
-            return f"{value.get('title')} (${value.get('price')}, {value.get('platform')})"
-        keys = ", ".join(list(value)[:6])
-        return f"dict with keys: {keys}"
-
-    text = str(value).replace("\n", " ")
-    return text if len(text) <= limit else text[:limit] + "…"
+def _short(value) -> str:
+    """Print full values so tool inputs and outputs remain inspectable."""
+    return json.dumps(value, ensure_ascii=False, indent=2)
 
 
 def check_iterations(count: int) -> None:

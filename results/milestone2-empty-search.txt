@@ -1,0 +1,21 @@
+﻿[1] parse_query
+      in:  "designer ballgown size XXS under $5"
+      out: {
+  "description": "designer ballgown",
+  "size": "XXS",
+  "max_price": 5.0
+}
+[2] search_listings (via MCP)
+      in:  {
+  "description": "designer ballgown",
+  "size": "XXS",
+  "max_price": 5.0
+}
+      out: []
+[3] branch
+      out: "No matching listings found. Try different keywords, a different size, or a higher budget."
+      →    empty search: stop before suggest_outfit
+
+  No matching listings found. Try different keywords, a different size, or a higher budget.
+
+0 model calls this session

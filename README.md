@@ -479,33 +479,47 @@ I finally scored this Y2K Baby Tee — Butterfly Print on depop for just $18.00!
 
 ## Verdicts and Diagnoses
 
-<!-- MET or MISSED per criterion against LAST UNIT's target, plus a sentence on
-     how you decided.
+| # | Target | Baseline verdict | How I decided |
+|---|---|---|---|
+| 1 | 4 of 5 | MET (5/5) | Every run completed MCP search, outfit, and card in order and returned a non-empty caption without an error. |
+| 2 | 5 of 5 | MET (5/5) | Each impossible search returned `[]`, called neither downstream tool, and named keywords, size, and budget as changes. |
+| 3 | 5 of 5 | MET (5/5) | Deep copies at both actual tool entry points equaled the first search result and selected item in all fields; all four IDs were `lst_002`, and no input request occurred. |
+| 4 | 4 of 5 | MET (5/5) | Word counts were 49, 49, 40, 45, and 40. Each card contained the complete title, $18.00, and exactly one complete-word platform mention. |
+| 5 | 5 of 5 | MET (5/5) | Each specified direct call returned only prices at or below its ceiling and included its specified boundary ID. |
 
-     Then, for every miss: which of the four places it happened — a tool, the
-     loop's branch, the session, or the model's output — AND the mechanism.
+**Diagnoses:** No original criterion was missed, so there is no failed
+criterion to diagnose. Deterministic branch, state, and budget targets are
+appropriately strict at 5/5, but the model criteria are limited: completion
+does not establish outfit quality, and criterion 4 checks a few listing facts
+without checking every other claim. Five tries of one matched item also do
+not establish performance across the whole catalog. I would tighten criterion
+4 in a future unit to reject unsupported fit/condition assertions and test
+multiple listings; its filed wording and target stay unchanged here.
 
-     Not a diagnosis:  "The fit card was bad."
-     A diagnosis:      "The fit card criterion missed on 2 of 5 items. Both had
-                        an empty brand field. My prompt puts the brand in the
-                        first sentence, so the card opened with a blank and read
-                        like a fragment. The tool worked; the prompt assumed a
-                        field that isn't always there."
+**Observed problem beyond the targets:** In criterion 4, try 1,
+`tools.py::create_fit_card` produced this actual final sentence:
 
-     Look for a pattern. Three misses on the same tool is one problem, not
-     three. -->
+```text
+It has the cutest fitted crop length and fits like an absolute dream.
+```
 
-| # | Criterion | Target | Verdict | How I decided |
-|---|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+The cropped silhouette is in the listing. The claim about how it fits the
+wearer is not. This occurs at the final model-output step, not the search,
+branch, or session: the full correct listing reached the tool, but the caption
+prompt's broad instruction against invented facts allowed promotional wording
+to imply a personal fit assessment. The same listing explicitly says the
+medium tag fits like a small, so an unqualified glowing fit claim obscures a
+real limitation. This is a qualitative limitation, not a reason to relabel an
+originally passing try as FAIL.
 
-**Diagnoses**
-
-
+AI verdict challenge (Codex, not Claude): an argument against MET on criterion
+4 is that the fit claim is ungrounded. However, its filed test requires word
+count, full title, correct price, and one platform mention, all of which hold.
+Adding another requirement after seeing the outputs would change the measure.
+The honest result is MET with the quality limitation recorded separately.
+Similarly, identical deterministic results are expected; the model runs made
+30 actual requests and returned differing captions, rather than cached copies.
+No peer review or Claude conversation is claimed.
 
 ---
 
